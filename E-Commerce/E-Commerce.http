@@ -4,3 +4,4 @@ GET {{E_Commerce_HostAddress}}/weatherforecast/
 Accept: application/json
 
 ###
+GET {{E_Commerce_HostAddress}}/api/products
