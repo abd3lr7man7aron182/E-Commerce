@@ -12,7 +12,7 @@ namespace E_Commerce.Persistence.Repositories
     public class UnitOfWork : IUnitOfWork
     {
         private readonly StoreDbContext dbContext;
-        private Dictionary<Type, object> _repositories=[];
+        private Dictionary<Type, object> _repositories = [];
 
         public UnitOfWork(StoreDbContext dbContext)
         {
@@ -20,16 +20,16 @@ namespace E_Commerce.Persistence.Repositories
         }
         public IGenericRepository<TEntity, TKey> GetRepository<TEntity, TKey>() where TEntity : BaseEntity<TKey>
         {
-            var EntityType=typeof(TEntity);
+            var EntityType = typeof(TEntity);
             if (_repositories.TryGetValue(EntityType, out object? repository))
-                return (IGenericRepository<TEntity,TKey>)repository;
+                return (IGenericRepository<TEntity, TKey>)repository;
 
-            var newRepo=new GenericRepository<TEntity,TKey>(dbContext);
+            var newRepo = new GenericRepository<TEntity, TKey>(dbContext);
             _repositories[EntityType] = newRepo;
             return newRepo;
 
         }
 
-        public async Task<int> SaveChangesAsync()=> await dbContext.SaveChangesAsync();
+        public async Task<int> SaveChangesAsync() => await dbContext.SaveChangesAsync();
     }
 }

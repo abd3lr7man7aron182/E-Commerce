@@ -31,14 +31,14 @@ namespace E_Commerce
 
             });
             builder.Services.AddScoped<IDataInitializer, DataInitializer>();
-            builder.Services.AddScoped<IUnitOfWork,UnitOfWork>();
+            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             //builder.Services.AddAutoMapper(x => x.AddProfile<ProductProfile>());
             //builder.Services.AddAutoMapper(x=>x.LicenseKey="",typeof(ProductProfile).Assembly);
             builder.Services.AddAutoMapper(typeof(ServicesAssemblyReference).Assembly);
             builder.Services.AddTransient<ProductPictureUrlResolver>();
-            builder.Services.AddScoped<IProductService,ProductService>();
+            builder.Services.AddScoped<IProductService, ProductService>();
             #endregion
-            
+
             var app = builder.Build();
             #region Data Seed
 
