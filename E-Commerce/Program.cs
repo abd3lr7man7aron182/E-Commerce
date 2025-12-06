@@ -1,16 +1,25 @@
 
+using E_Commerce.Domain.Contract;
+using E_Commerce.Extensions; 
+using E_Commerce.Persistence.Data.DataSeed;
 using E_Commerce.Persistence.Data.DbContexts;
+using E_Commerce.Persistence.Repositories;
+using E_Commerce.Services;
+using E_Commerce.Services.MappingProfiles;
+using E_Commerce.Services_Abstraction;
 using Microsoft.EntityFrameworkCore;
+using StackExchange.Redis;
+using System.Threading.Tasks;
 
 namespace E_Commerce
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            #region Add services to the container.
+            #region Add services to the container
 
 
             builder.Services.AddControllers();
@@ -20,11 +29,32 @@ namespace E_Commerce
             builder.Services.AddDbContext<StoreDbContext>(options =>
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-                
+
             });
+            builder.Services.AddScoped<IDataInitializer, DataInitializer>();
+            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+            //builder.Services.AddAutoMapper(x => x.AddProfile<ProductProfile>());
+            //builder.Services.AddAutoMapper(x=>x.LicenseKey="",typeof(ProductProfile).Assembly);
+            builder.Services.AddAutoMapper(typeof(ServicesAssemblyReference).Assembly);
+            builder.Services.AddTransient<ProductPictureUrlResolver>();
+            builder.Services.AddScoped<IProductService, ProductService>();
+            builder.Services.AddSingleton<IConnectionMultiplexer>(SP =>
+            {
+                return ConnectionMultiplexer.Connect(builder.Configuration.GetConnectionString("RedisConnection")!);
+            });
+            builder.Services.AddScoped<IBasketRepository , BasketRepository>();
+            builder.Services.AddScoped<IBasketService, BasketService>();
             #endregion
 
             var app = builder.Build();
+            #region Data Seed
+
+            await app.MigrateDataBaseAsync();
+
+            await app.SeedDataBaseAsync();
+
+
+            #endregion
 
             #region Configure the HTTP request pipeline.
 
@@ -35,14 +65,14 @@ namespace E_Commerce
             }
 
             app.UseHttpsRedirection();
-
-             app.UseAuthorization();
+            app.UseStaticFiles();
+            app.UseAuthorization();
 
 
             app.MapControllers();
             #endregion
 
-            app.Run();
+            await app.RunAsync();
         }
     }
 }
